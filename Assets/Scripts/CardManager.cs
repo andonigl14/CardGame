@@ -78,6 +78,7 @@ public class CardManager : MonoBehaviour
 
     }
 
+    //APPLY GEM MODIFIER WHEN CLICKED
     public int ApplyGem(int position, int number, int gem)
     {
 
