@@ -13,6 +13,7 @@ public class Card : MonoBehaviour
     public int position;
     public Text clickedNumberText;
     bool clicked = false;
+    public Sprite cardSprite;
     public GameObject CardManager;
     public ColorBlock[] colors;
 

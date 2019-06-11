@@ -45,7 +45,7 @@ public class CardManager : MonoBehaviour
             g.GetComponent<Card>().gem = gemIndex;
             g.GetComponent<Card>().setColor();
 
-            cardIndex = ExclusiveRandom(0, 100);
+            cardIndex = ExclusiveRandom(0, 10);
             g.GetComponent<Image>().sprite = cardSprites[cardIndex];
             g.GetComponent<Card>().number = cardIndex;
             g.transform.GetChild(0).transform.GetChild(0).GetComponent<Text>().text = cardIndex.ToString();         

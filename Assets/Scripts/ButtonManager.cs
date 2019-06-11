@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class ButtonManager : MonoBehaviour
 {
-    public CardManager cManager;
+    public CardManager2 cManager;
     // Start is called before the first frame update
     string buttonText;
       
