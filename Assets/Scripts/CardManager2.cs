@@ -9,148 +9,168 @@ public class CardManager2 : MonoBehaviour
     //CARD ARRAYS
     public Sprite[] cardSprites;
     public Texture[] gemsSprites;
-    public GameObject[] EasyCards;
-    public GameObject[] DifficultCards;
-    public GameObject CurrentCard;
-    public GameObject[] EasyRandomCards;
-    public GameObject[] DifficultRandomCards;
-
-    //EXCLUSIVE RAMDOM UTILITY LIST
-    List<int> randomChecker = new List<int>();
-   
+    public List<GameObject> easyCards;
+    //INDEXES
+    public GameObject[] difficultCards;
+    public GameObject currentCard;  
+    public GameObject[] difficultRandomCards;
+    public Sprite[] backDrawing;
+    public Texture greyGem;
+    //EXCLUSIVE RAMDOM UTILITY LISTS
+    public List<int> randomChecker = new List<int>();
+    public List<GameObject> easyRandomCards;
+    List<GameObject> removedCards = new List<GameObject>();
     //INDEXES
     int cardIndex;
     int gemIndex;        
-    int currentCardIndex;
-
-    //GAMEMODES
-    string gameMode = "classic";
-
+   
     //Classic
     public int currentlevel=0;
-    public int maxlevels=10;
-
-    //Survial
-    bool isCorrect=true;
-
-    //Time trial
-    float trialTime = 300.0f;
+    public GameObject endMatchMenu;    
+    float trialTime = 0f;
     public Text timeText;
     int timeAux;
+    int back;
     
     void Update()
     {
-        Timer();
-
-        //DEBUG
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            generateCards();
-        }
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            generateMainCard();
-        }
+        Timer();        
     }
 
     //GAMEFLOW
-    public void generateCards()
+    public void GenerateCards()
     {
-        //Generate lvl cards
+        trialTime = 0f;
+        endMatchMenu.SetActive(false);
+        //Generate r cards
         randomChecker.Clear();
-        foreach (GameObject g in EasyCards)
+        back = Random.Range(0, 3);
+        
+        foreach (GameObject g in easyCards)
         {
             gemIndex = Random.Range(0, 5);
             g.transform.GetChild(0).GetComponent<RawImage>().texture = gemsSprites[gemIndex];
             g.GetComponent<Card>().gem = gemIndex;
-
+            g.GetComponent<Card>().gemTexture = g.transform.GetChild(0).GetComponent<RawImage>().texture;
 
             cardIndex = ExclusiveRandom(0, 99);
+           
             g.GetComponent<Image>().sprite = cardSprites[cardIndex];
             g.GetComponent<Card>().cardSprite = cardSprites[cardIndex];
+            removedCards.Add(g);
 
         }
         randomChecker.Clear();
 
         //Generate main card random array
-       for (int i = 0; i<8; i++)
+       
+        int index;
+          
+        for (int i =0; i<8; i++) // we use for instead of foreach to be able to modify the lists
         {
+            index = Random.Range(0, removedCards.Count);
 
-          EasyRandomCards[i] = EasyCards[1];
-
-       }
-        randomChecker.Clear();
-        currentCardIndex = 0;
+            easyRandomCards.Add(removedCards[index]);
+            removedCards.RemoveAt(index);
+           
+        }
+        removedCards.Clear();
+      
     }
 
     //Generate exlusive main card choosing between generated cards
-    public void generateMainCard()
+    public void GenerateMainCard()
     {
-        CurrentCard.GetComponent<Image>().sprite = EasyRandomCards[currentCardIndex].GetComponent<Image>().sprite;
-        currentCardIndex++;
-
-    }
-      
-
-    //generate new lvl
-    public void reset()
-    {
-        foreach (GameObject g in EasyCards)
+        if (easyRandomCards.Count > 0)
         {
-            g.GetComponent<Card>().clickedNumberText.gameObject.SetActive(false);
-            g.GetComponent<Button>().interactable = true;
-
+            currentCard.GetComponent<Image>().sprite = easyRandomCards[0].GetComponent<Card>().cardSprite;
+            currentCard.transform.GetChild(0).GetComponent<RawImage>().texture = easyRandomCards[0].GetComponent<Card>().gemTexture;
         }
-        currentlevel++;       
-        generateCards();
+        else
+        {
+            EndMatch();
+        }
 
     }
 
-    //stop playing
-    void endMatch()
+    public void HideMainCard()
     {
 
+        currentCard.GetComponent<Image>().sprite = backDrawing[back];
+        currentCard.transform.GetChild(0).GetComponent<RawImage>().texture = greyGem;
     }
-
 
     //GAMEMODES
-    public void playClassic()
+    public void PlayClassic()
     {
-        currentlevel++;
-        maxlevels = 10;
-        trialTime = 0.0f;
-        
-        if (currentlevel >= maxlevels)
-            endMatch();
-        else
-            generateCards();
+        GenerateCards();
+        HideMainCard();
+        StartCoroutine(HideCards());
+       
     }
 
+    public void ActivateCards( bool activation)
+    {
+        foreach (GameObject g in easyRandomCards)
+        {
+            g.GetComponent<Button>().interactable = activation;
+        }
+    }
+    public void RemoveCard(GameObject card)
+    {
+        foreach ( GameObject C in easyRandomCards)
+        {
+            if ( C == card)
+            {
+                removedCards.Add(C);
+            }
+        }
+        easyRandomCards.Remove(removedCards[0]);
+        removedCards.Clear();
 
+    }
 
+    IEnumerator HideCards()
+    {
+        Debug.Log("hiding cards");
+        yield return new WaitForSeconds(5.0f);
+        
+        foreach (GameObject g in easyCards)
+        {
+            g.GetComponent<Image>().sprite = backDrawing[back];
+            g.transform.GetChild(0).GetComponent<RawImage>().texture = greyGem;
+            g.GetComponent<Button>().interactable = true;
+        }
+        GenerateMainCard();
+    }
+    //stop playing
+    void EndMatch()
+    {
+        Debug.Log("match ended");
+        currentlevel++;
+        endMatchMenu.SetActive(true);
+    }
+       
 
+    public void WrongCardCaller( GameObject card)
+    {
+        StartCoroutine(WrongCard(card));
+    }
 
-
-
+    IEnumerator WrongCard(GameObject card)
+    {
+        ActivateCards(false);
+        yield return new WaitForSeconds(2.0f);
+        card.GetComponent<Image>().sprite = backDrawing[back];
+        card.transform.GetChild(0).GetComponent<RawImage>().texture = greyGem;
+        ActivateCards(true);
+    }
     //UTILITIES
 
     void Timer()
     {
-        if (gameMode == "timetrial")
-        {
-            if (trialTime <= 0)
-                trialTime -= Time.deltaTime;
-
-            timeAux = (int)trialTime;
-        }
-
-        if (gameMode == "classic")
-        {
-            trialTime += Time.deltaTime;
-            timeAux = (int)trialTime;
-        }
-
+        trialTime += Time.deltaTime;
+        timeAux = (int)trialTime;
         timeText.text = timeAux.ToString();
     }
       
@@ -161,14 +181,12 @@ public class CardManager2 : MonoBehaviour
         int result;
         result = Random.Range(min, max);
 
-        while (randomChecker.Contains(result))
+        while(randomChecker.Contains(result))
         {
             result = Random.Range(min, max);
         }
-        randomChecker.Add(result);
-
-        // Debug.Log("Utimo result:" + result);
-        // Debug.Log("-----Salgo EN RANDOM-----");
+            randomChecker.Add(result);
+     
         return result;
 
     }

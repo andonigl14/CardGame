@@ -6,34 +6,36 @@ using UnityEngine.UI;
 public class Card : MonoBehaviour
 {
 
-    public int gem;
-    public int number;
-    public int gemedNumber;
-    public int clickedNumber;
-    public int position;
-    public Text clickedNumberText;
-    bool clicked = false;
+    public int gem;     
     public Sprite cardSprite;
+    public Texture gemTexture;
     public GameObject CardManager;
     public ColorBlock[] colors;
 
     public void ClickCard()
     {
-        Debug.Log("Wola");
-        position = CardManager.GetComponent<CardManager>().clickedCards;
-        clickedNumber = CardManager.GetComponent<CardManager>().ApplyGem(position, number, gem);
-        CardManager.GetComponent<CardManager>().clickedCards++;
-        clickedNumberText.gameObject.SetActive(true);
-        clickedNumberText.text = clickedNumber.ToString();
-        CardManager.GetComponent<CardManager>().myAnwer += clickedNumber;
-        gameObject.GetComponent<Button>().interactable = false;
-        if (CardManager.GetComponent<CardManager>().clickedCards == 4)
+
+        gameObject.GetComponent<Image>().sprite = cardSprite;
+        gameObject.transform.GetChild(0).GetComponent<RawImage>().texture = gemTexture;
+        if (CardManager.GetComponent<CardManager2>().currentCard.GetComponent<Image>().sprite == cardSprite
+            && CardManager.GetComponent<CardManager2>().currentCard.transform.GetChild(0).GetComponent<RawImage>().texture == gemTexture)
         {
-            StartCoroutine( CardManager.GetComponent<CardManager>().checkAnswer());
+            gameObject.GetComponent<Button>().interactable = false;
+            CardManager.GetComponent<CardManager2>().RemoveCard(gameObject);
+            CardManager.GetComponent<CardManager2>().GenerateMainCard();
         }
+        else
+        {
+            CardManager.GetComponent<CardManager2>().WrongCardCaller(gameObject);
+        }
+        
+        
+        
+        
+        
     }
 
-    public void setColor()
+    public void SetColor()
     {
 
 

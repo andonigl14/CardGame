@@ -57,7 +57,7 @@ public class ButtonManager : MonoBehaviour
 
     public void classicModePlay(GameObject gamePanel)
     {
-        gamePanel.SetActive(true);
-        cManager.playClassic();
+        StartCoroutine(menuDelay(gamePanel, true));        
+        cManager.PlayClassic();
     }
 }
